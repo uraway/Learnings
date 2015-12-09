@@ -37,11 +37,11 @@
 			- [Inheritance](#inheritance)
 			- [The Fat Arrow](#the-fat-arrow)
 			- [Using a Class for Encapsulation](#using-a-class-for-encapsulation)
+
 <!-- /TOC -->
 
 
-@[](
-https://www.youtube.com/watch?v=mNkr8XPjdrk:embed:cite)
+[![IMAGE ALT TEXT](http://img.youtube.com/vi/mNkr8XPjdrk/0.jpg)](https://www.youtube.com/watch?v=OZbKZ6cPcbw&list=PLFvzBwXlguwy-J1vO-M0LdD4XDZ7Mh6il "CoffeeScript")
 
 
 # [CoffeeScript](http://coffeescript.org/)
