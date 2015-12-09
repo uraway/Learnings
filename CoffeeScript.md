@@ -1,8 +1,8 @@
 <!-- TOC depth:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
 - [[CoffeeScript](http://coffeescript.org/)](#coffeescripthttpcoffeescriptorg)
-- [The CoffeeScript Compiler](#the-coffeescript-compiler)
-	- [Install](#install)
+	- [The CoffeeScript Compiler](#the-coffeescript-compiler)
+			- [Install](#install)
 	- [Command Line Examples](#command-line-examples)
 	- [Basic Syntax](#basic-syntax)
 			- [Variables](#variables)
@@ -79,6 +79,7 @@
 			- [Using a Class for Encapsulation](#using-a-class-for-encapsulation)
 <!-- /TOC -->
 
+
 @[](
 https://www.youtube.com/watch?v=mNkr8XPjdrk:embed:cite)
 
@@ -91,9 +92,9 @@ https://www.youtube.com/watch?v=mNkr8XPjdrk:embed:cite)
  - JavaScriptにコンパイルが必要
  - PythonやRubyを意識した文体。インデントに注意
 
-# The CoffeeScript Compiler
+## The CoffeeScript Compiler
 
-## Install
+#### Install
 ```
 $ npm install -g coffee-script
 ```
