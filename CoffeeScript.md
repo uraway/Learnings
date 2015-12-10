@@ -6,7 +6,6 @@
 	- [Command Line Examples](#command-line-examples)
 	- [Basic Syntax](#basic-syntax)
 			- [Variables](#variables)
-- [No variable declarations](#no-variable-declarations)
 - [No semicolons](#no-semicolons)
 			- [functions](#functions)
 - [Only use Function Expressions](#only-use-function-expressions)
@@ -131,7 +130,7 @@ CoffeeScript
 ```coffeescript
 message = "Coffee"
 alert(message)
-#No variable declarations
+No variable declarations
 #No semicolons
 ```
 
