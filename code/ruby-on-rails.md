@@ -290,3 +290,73 @@ validates :status,
           acceptance: true
           confirmation: true
 ```
+
+## RELATIONSHIPS
+tweets
+|id| status | zombie |
+|---|---|---|
+|1|Where can I get a good bite to eat?|Ash|
+|2|My left arm is missing, but I don't care.|Bob|
+|3|I just ate some delicious brains.|Jim|
+|4|OMG, my fingers turned green. #FML|Ash|
+=>
+tweets
+|id| status | zombie_id |
+|---|---|---|
+|1|Where can I get a good bite to eat?|1|
+|2|My left arm is missing, but I don't care.|2|
+|3|I just ate some delicious brains.|3|
+|4|OMG, my fingers turned green. #FML|1|
+
+|id|name|graveyard|
+|1|Ash|Glen Haven Memorial Cemetery|
+|2|Bob|Chapel Hill Cemetery|
+|3|Jim|My Father's Basement|
+
+a Zombie *HAS MANY* Tweets
+``app/models/zombie.rb``
+```ruby
+class Zombie < ActiveRecord::Base
+  has_many :tweets
+            # Plural
+end
+```
+
+a Tweet *BELONGS TO* a Zombie
+``app/models/tweet.rb``
+```ruby
+class Tweet < ActiveRecord::Base
+  belongs_to :zombie
+              # Singular
+end
+```
+
+#### Using RELATIONSHIPS
+```
+> ash = Zombie.find(1)
+=> #<Zombie id: 1, name: "Ash", graveyard: "Glen Haven Memorial Cemetery">
+
+> t = Tweet.create(status: "Your eyelids taste like bacon.", zombie: ash)
+=> #<Tweet id: 5, status: "Your eyelids taste like bacon.", zombie_id: 1>
+
+> ash.tweets.count
+=> 3
+
+> ash.tweets
+=> [#<Tweet id: 1, status: "Where can I get a good bite to eat?", zombie_id: 1>,
+    #<Tweet id: 4, status: "OMG, my fingers turned green. #FML", zombie_id: 1>,
+    #<Tweet id: 5, status: "Your eyelids taste like bacon.", zombie_id: 1>]
+
+```
+
+```
+> t = Tweet.find(5)
+=> #<Tweet id: 5, status: "Your eyelids taste like bacon.", zombie_id: 1>
+
+> t.zombie
+=> #<Zombie id:1,
+            name: "Ash",
+            graveyard: "Glen Haven Memorial Cemetery"
+
+> t.zombie.name
+=> "Ash"
