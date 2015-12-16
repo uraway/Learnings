@@ -362,7 +362,7 @@ end
 => "Ash"
 ```
 
-### VIEW VISUAL REPRESENTATION
+## VIEW VISUAL REPRESENTATION
 View...User Interface. What we see.
 
 Embedded Ruby
@@ -515,4 +515,503 @@ tweet = Tweet.find(1)
 Link Recipe
 ```
 <%= link_to text_to_show, code %>
+```
+
+## CONTROLLERS BRAINS OF THE APP
+#### Request
+``/app/controllers/tweets_controller.rb``
+```ruby
+class TweetsController < ApplicationController
+  ...
+end
+```
+``app/views/tweets/show.html.erb``
+```html
+<% tweet = Tweet.find(1) %>
+<h1><%= tweet.status %></h1>
+<p>Posted by <%= tweet.zombie.name %></p>
+```
+<br>
+=>
+<br>
+``/app/controllers/tweets_controller.rb``
+```ruby
+class TweetsController < ApplicationController
+  def show
+    tweet = Tweet.find(1)
+  end
+end
+```
+``app/views/tweets/show.html.erb``
+```html
+<h1><%= tweet.status %></h1>
+<p>Posted by <%= tweet.zombie.name %></p>
+```
+<br>
+=>
+<br>
+Instance Variable: grants view access to variables wtih ``@``
+``/app/controllers/tweets_controller.rb``
+```ruby
+class TweetsController < ApplicationController
+  def show
+    @tweet = Tweet.find(1)
+  end
+end
+```
+``app/views/tweets/show.html.erb``
+```html
+<h1><%= @tweet.status %></h1>
+<p>Posted by <%= @tweet.zombie.name %></p>
+```
+<br>
+=>
+<br>
+#### Rendering a Different View
+``/app/controllers/tweets_controller.rb``
+```ruby
+class TweetsController < ApplicationController
+  def show
+    @tweet = Tweet.find(1)
+    render action: 'status'
+  end
+end
+```
+``app/views/tweets/show.html.erb``
+```html
+<h1><%= @tweet.status %></h1>
+<p>Posted by <%= @tweet.zombie.name %></p>
+```
+<br>
+=>
+<br>
+#### Accepting Parameters
+```ruby
+Params Recipe: params = { id: "1"}
+```
+``/app/controllers/tweets_controller.rb``
+```ruby
+class TweetsController < ApplicationController
+  def show
+    @tweet = Tweet.find(params[:id])
+  end
+end
+```
+``app/views/tweets/show.html.erb``
+```html
+<h1><%= @tweet.status %></h1>
+<p>Posted by <%= @tweet.zombie.name %></p>
+```
+
+#### Parameters
+/tweets?/status=I'm dead
+params = { status: "I'm dead" }
+```ruby
+@tweet = Tweet.create(staus: params[:status])
+```
+<br>
+/tweets?tweet[status]=I'm dead
+params = { tweet: {status: "I'm dead" }}
+```ruby
+@tweet = Tweet.create(status: params[:tweet][:status])
+# Alternate Syntax
+# But it is a rotten code. Users might be able to set any attributes.
+@tweet = Tweet.create(params[:tweet])
+```
+
+#### Strong Parameters
+We need to specify the parameter key we require
+```ruby
+require(:tweet)
+```
+And the attributes we will permit to be set
+```ruby
+permit(:status)
+```
+<br>
+/tweets?tweet[status]=I'm dead
+params = { tweet: {status: "I'm dead" }}
+```ruby
+@tweet = Tweet.create(params.require(:tweet).permit(:status))
+```
+If there were multiple things we needed to permit, we could use an array.
+```ruby
+params.require(:tweet).permit([:status, :location])
+```
+Strong Params Required only when CREATING or UPDATING with MULTIPLE Attributes.
+```ruby
+@tweet = Tweet.create(params[:tweet])
+```
+
+#### Respond with XML or JSON?
+/tweets/1
+```XML
+<? xml version="1.0" encoding="UTF-8"?>
+<tweet>
+  <id type="integer">1</id>
+  <status>Where can I get a good bite to eat?</status>
+  <zombie-id type="integer">1</zombie-id>
+</tweet>
+```
+```JSON
+{"tweet":{"id":1,
+          "status":"Where can I get a good bite to eat?",
+          "zombie_id":1}}
+```
+
+#### Respond with HTML or JSON
+/tweets/1.json
+``/app/controllers/tweets_controller.rb``
+```ruby
+class TweetsController < ApplicationController
+  def show
+    @tweet = Tweet.find(params[:id])
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @tweet }
+    end
+  end
+end
+```
+
+#### Respond with HTML. JSON. XML
+/tweets/1.xml
+``/app/controllers/tweets_controller.rb``
+```ruby
+class TweetsController < ApplicationController
+  def show
+    @tweet = Tweet.find(params[:id])
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @tweet }
+      format.xml { render xml: @tweet }
+    end
+  end
+end
+```
+
+#### Controller Actions
+=> Views
+``/app/controllers/tweets_controller.rb``
+```ruby
+class TweetsController < ApplicationController
+  def index   List all tweets
+  def show    Show a single tweet
+  def new     Show a new tweet form
+  def edit    Show an edit tweet form
+  def create  Create a new tweet
+  def update  Update a tweet
+  def destroy Delete a tweet
+end
+```
+
+#### The Edit Action
+``/app/controllers/tweets_controller.rb``
+```ruby
+def edit
+  @tweet = Tweet.find(params[:id])
+end
+```
+
+#### Redirect and Flash
+``/app/controllers/tweets_controller.rb``
+```ruby
+class TweetsController < ApplicationController
+  def edit
+    @tweet = Tweet.find(params[:id])
+    if session[:zombie_id] != @tweet.zombie_id
+      flash[:notice] = "Sorry, you can't edit this tweet"
+      redirect_to(tweets_path)
+    end
+  end
+end
+```
+|Recipe          |Works                         |
+|------          |-----                         |
+|session         | Works like a per user hash   |
+|flash[:notice]  | To send messages to the Users|
+|redirect <path> | To redirect the request      |
+
+```ruby
+Alternative Recipe: redirect_to(tweets_path, :notice => "Sorry, you can't edit this tweet")
+```
+
+#### Notice for layouts
+``app/views/layouts/application.html.erb``
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Twitter for Zombies</title>
+  </head>
+  <body>
+    <img src="/images/twitter.png" />
+    <%= yield %>
+  </body>
+</html>
+```
+<br>
+=>
+<br>
+``app/views/layouts/application.html.erb``
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Twitter for Zombies</title>
+  </head>
+  <body>
+    <img src="/images/twitter.png" />
+    <% if flash[:notice] %>
+      <div id="notice"><%= flash[:notice] %></div>
+    <% end %>
+    <%= yield %>
+  </body>
+</html>
+```
+
+#### Adding Some Authorization
+``/app/controllers/tweets_controller.rb``
+```ruby
+class TweetsController < ApplicationController
+  def index   List all tweets
+  def show    Show a single tweet
+  def new     Show a new tweet form
+  def edit    Show an edit tweet form   <-
+  def create  Create a new tweet
+  def update  Update a tweet    <-
+  def destroy Delete a tweet    <- #Need Authorization
+end
+```
+
+#### Before Actions
+REQUEST
+``/app/controllers/tweets_controller.rb``
+```ruby
+class TweetsController < ApplicationController
+  def edit
+    @tweet = Tweet.find(params[:id])
+    ...
+  end
+  def update
+    @tweet = Tweet.find(params[:id])
+    ...
+  end
+  def destroy
+    @tweet = Tweet.find(params[:id])
+    ...
+  end
+end
+```
+BEFORE ACTION
+``/app/controllers/tweets_controller.rb``
+```ruby
+class TweetsController < ApplicationController
+  before_action :get_tweet , only: [:edit, :update, :destroy]
+  def get_tweet
+    @tweet = Tweet.find(params[:id])
+  end
+  def edit
+    @tweet = Tweet.find(params[:id])
+    ...
+  end
+  def update
+    @tweet = Tweet.find(params[:id])
+    ...
+  end
+  def destroy
+    @tweet = Tweet.find(params[:id])
+    ...
+  end
+end
+```
+``/app/controllers/tweets_controller.rb``
+```ruby
+class TweetsController < ApplicationController
+  before_action :get_tweet , :only => [:edit, :update, :destroy]
+  before_action :check_auth , :only => [:edit, :update, :destroy]
+  def get_tweet
+    @tweet = Tweet.find(params[:id])
+  end
+  def check_auth
+    if session[:zombie_id] != @tweet.zombie_id
+      flash[:notice] = "Sorry, you can't edit this tweet"
+      redirect_to tweets_path
+    end
+  end
+  def edit
+  def update
+  def destroy
+end
+```
+
+<br>
+<br>
+CONTROLLER BEFORE ACTION
+Add a before_action that calls a method to check if a Zombie has tweets. Redirect to zombies_path if the zombie doesn't have tweets, only on show.
+
+```ruby
+class ZombiesController < ApplicationController
+  before_action :find_zombie
+  before_action :check_tweets, only: :show
+  def show
+    render action: :show
+  end
+
+  def find_zombie
+    @zombie = Zombie.find params[:id]
+  end
+
+  def check_tweets
+    if @zombie.tweet.size == 0
+      redirect_to zombies_path
+    end
+  end
+end
+```
+
+## ROUTING THROUGH RAILS
+
+Application Stack
+
+```
+Views -> Models -> Controllers -> Routes
+```
+
+#### In order to properly find these paths...
+```html
+<% link_to "<link text>", <code> %>
+```
+
+|Action         |Code           |The URL Generated  |
+|---            |---            |---                |
+|List all tweets|tweets_path    |/tweets            |
+|New tweet form |new_tweet_path |/tweets/new        |
+
+```ruby
+tweet = Tweet.find(1) #These paths need a tweet
+```
+
+|Action         |Code                     |The URL Generated|
+|---            |---|---|
+|Show a tweet   |tweet                    |/tweets/1        |
+|Edit a tweet   |edit_tweet_path(tweet)   |/tweets/1/edit   |
+|Delete a tweet |tweet, :method => :delete|/tweets/1        |
+
+#### and these actions...
+``/app/controllers/tweets_controller.rb``
+```ruby
+class TweetsController < ApplicationController
+  def index   List all tweets
+  def show    Show a single tweet
+  def new     Show a new tweet form
+  def edit    Show an edit tweet form   
+  def create  Create a new tweet
+  def update  Update a tweet   
+  def destroy Delete a tweet    
+end
+# -> Views
+```
+
+#### We need to define Routes
+Creating what we like to call a "REST"FULL resources
+<br>
+``zombie_twitter/config/routes.rb``
+```ruby
+ZombieTwitter::Application.routes.draw do
+  resources :tweets
+end
+```
+|Code           |The URL          |TweetsController |
+|---            |---              |---              |
+|tweets_path    |/tweets          |def index        |
+|tweet          |/tweet/<id>      |def show         |
+|new_tweet_path |/tweets/new      |def new          |
+|edit_tweet_path|/tweets/<id>/edit|def edit         |
+
+#### Custom Routes
+http://localhost:3000/new_tweet render -> http://localhost/tweets/new
+|Function   |name   |
+|---        |---    |
+|Controller |Tweets |
+|Action     |new    |
+
+``/config/routes.rb``
+```ruby
+ZombieTwitter::Application.routes.draw do
+  resources :tweets
+  get '/new_tweet' => 'tweets#new'
+end
+```
+```ruby
+get 'Path' => 'Controller#Action'
+```
+
+#### Named Routes
+http://localhost:3000/all render -> http://localhost:3000/tweets
+|Function   |name   |
+|---        |---    |
+|Controller |Tweets |
+|Action     |index  |
+``/config/routes.rb``
+```ruby
+get '/all' => 'tweets#index'
+```
+```html
+<!-- View -->
+<%= link_to "All Tweets", ???? %>
+<!-- tweets_path wouldn't work -->
+```
+
+```ruby
+get '/all' => 'tweets#index', as: 'all_tweets'
+```
+```html
+<!-- View -->
+<%= link_to "All Tweets", all_tweets_path %>
+```
+
+#### Redirect
+What if out tweets used to be found at /all but now our definitive URL is /tweets<br>
+<br>
+http://localhost:3000/all redirect -> http://location:3000/tweets
+```ruby
+get '/all' => redirect('/tweets')
+```
+```ruby
+get '/google' => redirect('http://www.google.com/')
+```
+
+#### Root Routes
+http://localhost:3000/ render -> http://localhost3000/tweets
+```ruby
+root to: "tweets#index"
+```
+```html
+<%= link_to "All Tweets", root_path %>
+```
+
+#### Route Parameters
+``/app/controllers/tweets_controller.rb``
+```ruby
+def index
+  if params[:zipcode]
+    @tweets = Tweet.where(zipcode: params[:zipcode])
+  elsif
+    @tweets = Tweet.all
+  end
+  respond_to do |format|
+    format.html #index.html.erb
+    format.xml { render xml: @tweets }
+  end
+end
+```
+```ruby
+get `/local_tweets/:zipcode` => 'tweets#index'
+```
+```ruby
+get '/local_tweets/:zipcode' => 'tweets#index', as: 'local_tweets'
+```
+```html
+<%= link_to "Tweets in 32828", local_tweets_path(32828) %>
 ```
