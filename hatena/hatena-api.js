@@ -1,55 +1,36 @@
-var https = require('https');
+var https   = require('https');
+var request = require('request');
 
-var body =
-'<?xml version="1.0" encoding="utf-8"?>' +
-'<entry xmlns="http://www.w3.org/2005/Atom" xmlns:app="http://www.w3.org/2007/app">' +
-  '<title>' + entryTitle + '</title>' +
-  '<author><name>' + hatenaId + '</name></author>' +
-  '<content type="text/plain">' +
-    entryContent +
-  '</content>' +
-'<updated>' + '2016-01-01T00:00:00' + '</updated>' +
-  '<category />' +
-  '<app:control>' +
-    '<app:draft>' + draftStatus + '</app:draft>' +
-  '</app:control>' +
-'</entry>'
+var HATENAID = 'uraway';
+var BLOGID = 'uraway.hatenablog.com';
+var APIKEY = 'tp65cffdkz';
+var url = 'https://blog.hatena.ne.jp/'+HATENAID+'/'+BLOGID+'/atom/entry';
+var auth = 'Basic ' + new Buffer(HATENAID+':'+APIKEY).toString('base64');
 
 
-var postRequest = {
-    host: "blog.hatena.ne.jp",
-    path: "/" + hatenaId + "/" + blogId + "/atom/entry",
-    auth: "uraway: tp65cffdkz",
-    method: "POST",
-    headers: {
-        'Cookie': "cookie",
-        'Content-Type': 'text/xml',
-        'Content-Length': Buffer.byteLength(body)
-    }
-};
+var options = {
+  url: url,
+  method: 'GET',
+  headers: {
+    'Authorization': auth
+  }
+}
 
-var hatenaId = "uraway";
-var blogId = "uraway.hatenablog.com";
-var apiKey = "tp65cffdkz";
+https.request(options, function(res) {
 
-var entryTitle = "test";
-var entryContent= "test";
-var draftStatus = "yes";
+  console.log(res.statusCode);
+  console.log(res.headers);
 
-var buffer = "";
+  var body = '';
+  res.setEncoding('utf8');
+  res.on('data', function (chunk) {
+    body += chunk;
+  });
 
-var req = https.request( postRequest, function( res ) {
+  res.on('end', function() {
+    console.log(body);
+  });
 
-   console.log( res.statusCode );
-   var buffer = "";
-   res.on( "data",function( data ) { buffer = buffer + data; } );
-   res.on( "end",function( data ) { console.log( buffer ); } );
-
-});
-
-req.on('error',function(e) {
-    console.log('problem with request: ' + e.message);
-});
-
-req.write( body );
-req.end();
+}).on('error', function(e) {
+  console.log(e.message);
+}).end();
