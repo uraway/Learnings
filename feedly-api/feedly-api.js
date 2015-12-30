@@ -30,17 +30,14 @@ http.get(url, function(res) {
           var twitterFollowers = obj.results[i].twitterFollowers;
           var related = obj.related;
 
-          console.log(deliciousTags);
+          console.log = function(feedId) {
+            document.getElementById('content').innerHTML += obj.results[i].feedId + "<br>";
+          };
           console.log(feedId);
           console.log(language);
           console.log(title);
 
         }
-
-
-
-
-
 
     });
 
